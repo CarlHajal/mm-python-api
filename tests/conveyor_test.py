@@ -18,9 +18,9 @@ while (1) :
 
     m1.emitgCode("V4 S" + str(speed) + " A" + str(accel) + " X")
 
-    print(m1.digitalRead(1,3))
+    print(m1.digitalRead(1,4))
 
-    while (m1.digitalRead(1,3)) :
+    while (m1.digitalRead(1,4)) :
         time.sleep(0.2)
 
     m1.emitgCode("V4 S" + str(-speed) + " A" + str(accel) + " X")

@@ -1341,11 +1341,15 @@ class MachineMotion :
         returnValue: Returns 1 if the input pin is logic HIGH (24V) and returns 0 if the input pin is logic LOW (0V).
         exampleCodePath: digitalRead.py
 
-        note: The pin labels on the digital IO module (pin 1, pin 2, pin 3, pin 4) correspond in software to (0, 1, 2, 3). Therefore, digitalRead(deviceNetworkId, 2)  will read the value on input pin 3.
+        note: The pin labels on the digital IO module (pin 1, pin 2, pin 3, pin 4) now correspond in software to (1, 2, 3, 4). Therefore, digitalRead(deviceNetworkId, 2)  will read the value on input pin 2.
         '''
 
+        if ( not isinstance(pin, (int, float)) ):
+            logging.warning("DEBUG: unexpected digital-input parameter type: pin type = " + type(pin))
+            return
+        pin = pin - 1
         if ( not self.isIoExpanderInputIdValid( deviceNetworkId, pin ) ):
-            logging.warning("DEBUG: unexpected digital-output parameters: device= " + str(deviceNetworkId) + " pin= " + str(pin))
+            logging.warning("DEBUG: unexpected digital-input parameters: device= " + str(deviceNetworkId) + " pin= " + str(pin))
             return
         if (not hasattr(self, 'digitalInputs')):
             self.digitalInputs = {}
@@ -1370,14 +1374,18 @@ class MachineMotion :
                 type: Integer
         exampleCodePath: digitalWrite.py
 
-        note: Output pins maximum sourcing current is 75 mA and the maximum sinking current is 100 mA. The pin labels on the digital IO module (pin 1, pin 2, pin 3, pin 4) correspond in software to (0, 1, 2, 3). Therefore, digitalWrite(deviceNetworkId, 2, 1)  will set output pin 3 to 24V.
+        note: Output pins maximum sourcing current is 75 mA and the maximum sinking current is 100 mA. The pin labels on the digital IO module (pin 1, pin 2, pin 3, pin 4) now correspond in software to (1, 2, 3, 4). Therefore, digitalWrite(deviceNetworkId, 3, 1)  will set output pin 3 to 24V.
 
         '''
 
+        if ( not isinstance(pin, (int, float)) ):
+            logging.warning("DEBUG: unexpected digitalOutput parameter type: pin type = " + type(pin))
+            return
+        pin = pin - 1
         if ( not self.isIoExpanderOutputIdValid( deviceNetworkId, pin ) ):
             logging.warning("DEBUG: unexpected digitalOutput parameters: device= " + str(deviceNetworkId) + " pin= " + str(pin))
             return
-        resp = self.myMqttClient.publish('devices/io-expander/' + str(deviceNetworkId) + '/digital-output/' +  str(pin), '1' if value else '0')
+        self.myMqttClient.publish('devices/io-expander/' + str(deviceNetworkId) + '/digital-output/' +  str(pin), '1' if value else '0')
 
         return
 

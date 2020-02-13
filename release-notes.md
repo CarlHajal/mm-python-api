@@ -1,3 +1,14 @@
+# Version 3.0
+
+## Compatibility
+
+ The Python API V3 requires MachineMotion HW version vE or newer (?).
+
+## Interface changes
+    - digitalRead(device, pin) now reads pin numbers from (1-4) instead of (0-3)
+    - digitalWrite(device, pin, value) now reads pin numbers from (1-4) instead of (0-3)
+
+
 # Version 2.0
 
 The MachineMotion Python API V2.0 aims at simplifying the interfaces to the digital input / outputs and the encoder position.

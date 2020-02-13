@@ -881,6 +881,8 @@ have been obsoleted and replaced with:
     - digitalRead( device, pin )
     - digitalWrite( device, pin )
     - readEncoderRealtimePosition( device )
+
+digitalRead and digitalWrite interfaces behave differently from version 3.0.
     
 ---
 ### isIoExpanderAvailable( device )
@@ -912,8 +914,8 @@ if ( machine_motion_example.isIoExpanderAvailable( io_expander_id ) ):
 Read the digital input from the given pin in put on the IO Expander
 
 @param device - The IO expander device identifier (1-3)  
-@param pin.   - The pin index to read from (0-3)  
-@return.      - The level at the IO expander pin  
+@param pin    - The pin index to read from (1-4) above v3.0 included, from (1-3) below v3.0.
+@return       - The level at the IO expander pin  
 
 #### Example
 
@@ -925,18 +927,18 @@ def templateCallback(data):
    
 machine_motion_example = MachineMotion(templateCallback, DEFAULT_IP_ADDRESS.usb_windows)
 io_expander_id = 1
-input_pin = 0
+input_pin = 1
 pinValue = machine_motion_example.digitalRead( io_expander_id , input_pin )
 
 ```
 
 ---
-### digitalWrite(device,  pin, value)
+### digitalWrite(device, pin, value)
 
 Modify the digital output of the given pin a the specified device.
 
 @param device - The IO expander device identifier (1-3)  
-@param pin.   - The pin index to write to (0-3)  
+@param pin    - The pin index to write from (1-4) above v3.0 included, from (1-3) below v3.0.  
 @param value  - The pin value to be written  
 
 #### Example
@@ -949,8 +951,8 @@ def templateCallback(data):
    
 machine_motion_example = MachineMotion(templateCallback, DEFAULT_IP_ADDRESS.usb_windows)
 io_expander_id = 1
-input_pin = 0
-machine_motion_example.digitalWrite( io_expander_id , input_pin, 0 )
+output_pin = 1
+machine_motion_example.digitalWrite( io_expander_id , output_pin, 0 )
 
 ```
 

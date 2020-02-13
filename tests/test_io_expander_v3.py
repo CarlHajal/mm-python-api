@@ -19,13 +19,13 @@ time.sleep(1)
 # Input device
 # TODO: make class/struct
 input_device = 1
-input_pin = 0
+input_pin = 1
 input_state = 0
 
 # Output device
 # TODO: make class/struct
 output_device = 2
-output_pin = 0
+output_pin = 1
 output_state = 0
 
 count = 0
@@ -38,7 +38,7 @@ turn_off_immediately = False # Set to True to run as fast as possible, i.e. turn
 error = False
 
 # Initliaze all inputs to 0 (from device 1)
-for x in range(3):
+for x in range(1, 4):
     mm.digitalWrite(input_device, x, 0)
 
 time.sleep(5)
@@ -47,15 +47,15 @@ print("1: All inputs initialized to 0")
 # Status Check
 # Read input from device 2
 print("Status Check:")
-print("pin 0: " + str(mm.digitalRead(output_device, 0)))
 print("pin 1: " + str(mm.digitalRead(output_device, 1)))
 print("pin 2: " + str(mm.digitalRead(output_device, 2)))
 print("pin 3: " + str(mm.digitalRead(output_device, 3)))
+print("pin 4: " + str(mm.digitalRead(output_device, 4)))
 print("---------------------")
 print("2: Status Check Done")
 
-#print("Device: 1, pin 0, value: " + str(value) )
-#print("Device :2, pin 0, value: " + str(value2) )
+#print("Device: 1, pin 1, value: " + str(value) )
+#print("Device :2, pin 1, value: " + str(value2) )
 
 # Test if publication of topic is possible
 #mm.myMqttClient.publish('devices/io-expander/' + str(device) + '/digital-output/' +  str(pin), '1' if value else '0', retain=True)
@@ -67,7 +67,7 @@ while(count < 100):
 
   count+=1
   # Write true to a random pin on device 1
-  random_pin = randint(0,3)
+  random_pin = randint(1,4)
   mm.digitalWrite(input_device, random_pin, 1)
 
   # check signal on device 2
@@ -99,5 +99,5 @@ print("Log: count: " + str(count) + " & checkFail count: " + str(checkFail_count
 print("End blink")
 
 # Read value
-#value = machine_motion_example.digitalRead(device, 0)
-#print("Device = 1, pin = 0, value " + str(value) )
+#value = machine_motion_example.digitalRead(device, 1)
+#print("Device = 1, pin = 1, value " + str(value) )
