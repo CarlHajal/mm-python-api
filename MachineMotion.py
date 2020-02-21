@@ -14,8 +14,13 @@ import paho.mqtt.subscribe as MQTTsubscribe
 import logging
 import traceback
 
-import httplib
 import urllib
+# Import if python 2
+if sys.version_info[0] < 3 :
+    import httplib
+# Import if python 3
+else :
+    import http.client
 
 class CONTROL_DEVICE_SIGNALS:
     SIGNAL0 = "SIGNAL0"
@@ -120,7 +125,14 @@ def HTTPSend(host, path, data=None) :
         lConn = None
         try :
             # Review: use keep-alive
-            lConn = httplib.HTTPConnection(host)
+
+            # If python 2
+            if sys.version_info[0] < 3 :
+                lConn = httplib.HTTPConnection(host)
+            # Else python 3
+            else :
+                lConn = http.client.HTTPConnection(host)
+
             if None == data:
                 lConn.request("GET", path)
             else:
@@ -128,7 +140,7 @@ def HTTPSend(host, path, data=None) :
             lResponse = lConn.getresponse()
             lResponse = lResponse.read()
             lConn.close()
-            return lResponse
+            return str(lResponse) # Casting as a string is necessary for python3
         except Exception :
             logging.warning("Could not GET %s: %s" % (path, traceback.format_exc()))
             if lConn :
@@ -192,7 +204,12 @@ class GCode:
     #
     def __emit__(self, gCode) :
 
-        rep = self.__send__("/gcode?%s" % urllib.urlencode({"gcode": "%s" % gCode}))
+        # If python 2
+        if sys.version_info[0] < 3 :
+            rep = self.__send__("/gcode?%s" % urllib.urlencode({"gcode": "%s" % gCode}))
+        # Else python 3
+        else :
+            rep = self.__send__("/gcode?%s" % urllib.parse.urlencode({"gcode": "%s" % gCode}))
 
         # Call user callback only if relevant
         if self.__userCallback__ is None : pass
@@ -321,7 +338,7 @@ class MachineMotion :
 
         return
 
-    def startContinuousMove(axis, speed, accel = None) :
+    def setContinuousMove(self, axis, speed, accel = None) :
 
         '''
         desc: Starts an axis using speed mode.
@@ -336,10 +353,10 @@ class MachineMotion :
                 desc: Acceleration used to reach the desired speed in mm^2 / sec
                 type: Number
 
-        exampleCodePath:
+        exampleCodePath: emitConveyorMove.py
         '''
         # set motor to speed mode
-        reply = self.myGCode.__emit__("V5 " + self.getAxisName(motor) + "2")
+        reply = self.myGCode.__emit__("V5 " + self.getAxisName(axis) + "2")
 
         if ( "echo" in reply and "ok" in reply ) : pass
         else :
@@ -348,7 +365,7 @@ class MachineMotion :
 
         if accel is not None :
             # Send speed command with accel
-            reply = self.myGCode.__emit__("V4 S" + str(speed / self.mech_gain[motor] * STEPPER_MOTOR.steps_per_turn * self.u_step[motor]) + " A" + str(accel / self.mech_gain[motor] * STEPPER_MOTOR.steps_per_turn * self.u_step[motor]) + " " + self.getAxisName(motor))
+            reply = self.myGCode.__emit__("V4 S" + str(speed / self.mech_gain[axis] * STEPPER_MOTOR.steps_per_turn * self.u_step[axis]) + " A" + str(accel / self.mech_gain[axis] * STEPPER_MOTOR.steps_per_turn * self.u_step[axis]) + " " + self.getAxisName(axis))
 
             if ( "echo" in reply and "ok" in reply ) : pass
             else :
@@ -357,7 +374,7 @@ class MachineMotion :
 
         else :
             # Send speed command
-            reply = self.myGCode.__emit__("V4 S" + str(speed / self.mech_gain[motor] * STEPPER_MOTOR.steps_per_turn * self.u_step[motor]) + " " + self.getAxisName(motor))
+            reply = self.myGCode.__emit__("V4 S" + str(speed / self.mech_gain[axis] * STEPPER_MOTOR.steps_per_turn * self.u_step[axis]) + " " + self.getAxisName(axis))
 
             if ( "echo" in reply and "ok" in reply ) : pass
             else :
@@ -366,7 +383,7 @@ class MachineMotion :
 
         return
 
-    def stopContinuousMove(axis, accel = None) :
+    def stopContinuousMove(self, axis, accel = None) :
         '''
         desc: Starts an axis using speed mode.
         params:
@@ -377,12 +394,12 @@ class MachineMotion :
                 desc: Acceleration used to reach speed = 0 in mm^2 / sec
                 type: Number
 
-        exampleCodePath:
+        exampleCodePath: emitConveyorMove.py
         '''
 
         if accel is not None :
             # Send speed command with accel
-            reply = self.myGCode.__emit__("V4 S0" + " A" + str(accel / self.mech_gain[motor] * STEPPER_MOTOR.steps_per_turn * self.u_step[motor]) + " " + self.getAxisName(motor))
+            reply = self.myGCode.__emit__("V4 S0" + " A" + str(accel / self.mech_gain[axis] * STEPPER_MOTOR.steps_per_turn * self.u_step[axis]) + " " + self.getAxisName(axis))
 
             if ( "echo" in reply and "ok" in reply ) : pass
             else :
@@ -391,7 +408,7 @@ class MachineMotion :
 
         else :
             # Send speed command
-            reply = self.myGCode.__emit__("V4 S0 " + self.getAxisName(motor))
+            reply = self.myGCode.__emit__("V4 S0 " + self.getAxisName(axis))
 
             if ( "echo" in reply and "ok" in reply ) : pass
             else :
@@ -985,7 +1002,7 @@ class MachineMotion :
         reply = self.myGCode.__emit__(gCode)
 
         if ( "echo" in reply and "ok" in reply ) : pass
-        else : raise Exception('Error in gCode execution')
+        else : raise Exception('Error in gCode execution (reply: %s)' % reply)
 
         return
 
@@ -1060,7 +1077,7 @@ class MachineMotion :
             #Recursively calls the function until motion is completed
             if ("COMPLETED" in reply) : return
             else :
-                print "Motion not completed : " + str(self.IP)
+                print( "Motion not completed : " + str(self.IP))
                 time.sleep(0.5)
                 return self.waitForMotionCompletion()
 
@@ -1381,7 +1398,7 @@ class MachineMotion :
 
         return
 
-    def readEncoder(self, encoder, readingType="realTime") :
+    def readEncoder(self, encoder, readingType=ENCODER_TYPE.real_time) :
         '''
         desc: Returns the last received encoder position in counts.
         params:
