@@ -13,14 +13,19 @@ m1 = MachineMotion("192.168.7.2", None)
 m1.releaseEstop()
 m1.resetSystem()
 
+m1.emitgCode("V4 S10000 A2000 Y")
+m1.emitgCode("V4 S10000 A2000 Z")
+
 while (True) :
-    m1.emitSpeed(2000)
+    m1.emitSpeed(1000)
 
     cspeed1 = 10000.0
     cspeed2 = 0.0
-    cacceleration = 20000.0
+    cacceleration = 10000.0
+    #posacceleration = 20000.0
+    distance = 1000.0
     quickacceleration = 40000.0
-    cduration = 3.0
+    cduration = 1.0
     stoptime = 2.0
     axis = "X"
 
@@ -35,7 +40,7 @@ while (True) :
     print("Position -")
     m1.emitgCode("V5 " + axis + "1")
     m1.emitgCode("G91")
-    m1.emitgCode("G0 " + axis + "-300")
+    m1.emitgCode(("G0 " + axis + "-%d") % (distance))
     m1.waitForMotionCompletion()
     time.sleep(3.0)
 
@@ -50,6 +55,6 @@ while (True) :
     print("Position +")
     m1.emitgCode("V5 " + axis + "1")
     m1.emitgCode("G91")
-    m1.emitgCode("G0 " + axis + "300")
+    m1.emitgCode(("G0 " + axis + "%d") % (distance))
     m1.waitForMotionCompletion()
     time.sleep(3.0)

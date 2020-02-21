@@ -3,6 +3,7 @@
 import sys
 import random
 import time
+import threading
 
 # Custom imports
 sys.path.append("..")
@@ -18,10 +19,13 @@ m1.resetSystem()
 
 time.sleep(2.0)
 
+speed = 500.0
+acceleration = 500.0
+
 move = 100.0
 
-m1.emitSpeed(500)
-m1.emitAcceleration(500)
+m1.emitSpeed(speed)
+m1.emitAcceleration(acceleration)
 m1.emitRelativeMove(3, DIRECTION.NORMAL, move)
 
 time.sleep(3.0)
@@ -50,17 +54,48 @@ pulses_per_turn = distance / required_distance
 
 print("Encoder resolution -> " + str(pulses_per_turn) + " pulses / turn")
 
-sampling = 4.0
+sampling = 2.0
 
-m1.setContinuousMove(AXIS_NUMBER.DRIVE3, 500, 500)
+def speed_update() :
+    speed = 0.0
+    while (True) :
+        pspeed = speed
+        if speed < 1000.0 :
+            speed = speed + 50.0
+        else :
+            speed = 100.0
 
-while (True) :
-    time.sleep(sampling)
+        m1.setContinuousMove(AXIS_NUMBER.DRIVE3, speed, acceleration)
 
-    position = m1.readEncoder(2)
+        print("Speed set at : " + str(speed) + " mm/sec")
 
-    speed = (position - previous_position) / sampling / 3600.0 * MECH_GAIN.roller_conveyor_mm_turn
+        time.sleep(abs(speed - pspeed) / (acceleration) + 4.0)
 
-    previous_position = position
+    return
 
-    print("Speed -> " + str(speed) + " mm / sec")
+def speed_reading() :
+    previous_position = m1.readEncoder(2)
+
+    while (True) :
+        time.sleep(sampling)
+
+        position = m1.readEncoder(2)
+
+        speed_read = (position - previous_position) / sampling / 3600.0 * MECH_GAIN.roller_conveyor_mm_turn
+
+        previous_position = position
+
+        print("Speed -> " + str(speed_read) + " mm / sec")
+
+    return
+
+t1 = threading.Thread(target=speed_update)
+t1.daemon = True
+t1.start()
+
+t2 = threading.Thread(target=speed_reading)
+t2.daemon = True
+t2.start()
+
+while True:
+    time.sleep(1)

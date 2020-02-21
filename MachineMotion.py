@@ -365,7 +365,7 @@ class MachineMotion :
 
         if accel is not None :
             # Send speed command with accel
-            reply = self.myGCode.__emit__("V4 S" + str(speed / self.mech_gain[axis] * STEPPER_MOTOR.steps_per_turn * self.u_step[axis]) + " A" + str(accel / self.mech_gain[axis] * STEPPER_MOTOR.steps_per_turn * self.u_step[axis]) + " " + self.getAxisName(axis))
+            reply = self.myGCode.__emit__("V4 S" + str(int(speed / self.mech_gain[axis] * STEPPER_MOTOR.steps_per_turn * self.u_step[axis])) + " A" + str(int(accel / self.mech_gain[axis] * STEPPER_MOTOR.steps_per_turn * self.u_step[axis])) + " " + self.getAxisName(axis))
 
             if ( "echo" in reply and "ok" in reply ) : pass
             else :
@@ -374,7 +374,7 @@ class MachineMotion :
 
         else :
             # Send speed command
-            reply = self.myGCode.__emit__("V4 S" + str(speed / self.mech_gain[axis] * STEPPER_MOTOR.steps_per_turn * self.u_step[axis]) + " " + self.getAxisName(axis))
+            reply = self.myGCode.__emit__("V4 S" + str(int(speed / self.mech_gain[axis] * STEPPER_MOTOR.steps_per_turn * self.u_step[axis])) + " " + self.getAxisName(axis))
 
             if ( "echo" in reply and "ok" in reply ) : pass
             else :
