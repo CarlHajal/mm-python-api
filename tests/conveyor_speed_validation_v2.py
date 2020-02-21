@@ -51,40 +51,45 @@ pulses_per_turn = distance / required_distance
 
 print("Encoder resolution -> " + str(pulses_per_turn) + " pulses / turn")
 
-sampling = 5.0
+# init values
+sampling = 10.0
 inputSpeed = 0.0
 errorList = []
 meanError = 0.0
 
-for i in range(1, 11):
+for i in range(1, 2):
 
     inputSpeed = random.random
 
-    print("Loop: " + str(i))
+    print("     Loop: " + str(i))
     # inputSpeed = 50.0*i
     inputSpeed = 500.0
-    # Increment speed by 50 mm/s
+    # Get initial position
+    initialPosition = m1.readEncoder(2)
+    # Start Conveyor
     m1.setContinuousMove(AXIS_NUMBER.DRIVE3, inputSpeed, 5000)
 
     time.sleep(sampling)
 
-    position = m1.readEncoder(2)
+    # Get final position
+    finalPosition = m1.readEncoder(2)
 
-    outputSpeed = abs(float((position - previous_position) / sampling / 3600.0 * MECH_GAIN.roller_conveyor_mm_turn))
+    outputSpeed = abs(float((finalPosition - initialPosition) / sampling / 3600.0 * MECH_GAIN.roller_conveyor_mm_turn))
 
-    speedDiff = abs(inputSpeed - outputSpeed)
-    percentError = (speedDiff/inputSpeed) * 100.0
-
-    previous_position = position
+    # speedDiff = abs(inputSpeed - outputSpeed)
+    percentError = (abs(inputSpeed - outputSpeed) / inputSpeed) * 100.0
 
     print("Input speed -> " + str(inputSpeed) + " mm / sec")
     print("Speed -> " + str(outputSpeed) + " mm / sec")
-    print("Percent error -> " + str(percentError))
+    print("Percent error -> " + str(round(percentError, 2)) + "%")
 
     errorList.append(percentError)
+    # Stop Conveyor
+    m1.stopContinuousMove(3)
+    time.sleep(5.0)
 
 print("--------------")
 m1.stopContinuousMove(3)
 meanError = statistics.mean(errorList) 
-print("Average error: " + str(meanError))
+print("Average error: " + str(round(meanError, 2)) + "%")
 print("End of Test")
