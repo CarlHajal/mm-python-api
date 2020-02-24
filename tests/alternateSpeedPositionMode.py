@@ -54,20 +54,22 @@ sampling = 5.0
 
 count = 0
 
-for i in range(100) :
+for i in range(10) :
 
     print("STart of loop: " + str(i))
-    randomSpeedMode = 350 * (2 * random.random()-1.0) 
+    # speedModeSpeed = 350.0 * (2 * random.random()-1.0) 
+    speedModeSpeed = 350.0
 
-    print("--Continous Move with speed: " + str(randomSpeedMode))
-    m1.setContinuousMove(3, randomSpeedMode, 1000)
-    time.sleep(3)
+    print("--Continous Move with speed: " + str(speedModeSpeed))
+    m1.setContinuousMove(3, speedModeSpeed, 1000)
+    time.sleep(sampling)
 
-    randomPositionMode = 400 * (2 * random.random()-1.0) 
+    # positionModeSpeed = 350.0 * (2 * random.random()-1.0) 
+    positionModeSpeed = 350.0
 
-    print("--Position Move with speed: " + str(randomPositionMode))
-    m1.emitgCode("G0 Z10000 F" + str(randomPositionMode*60))
-    time.sleep(3)
+    print("--Position Move with speed: " + str(positionModeSpeed))
+    m1.emitgCode("G0 Z" + str(positionModeSpeed*sampling) + " F" + str(positionModeSpeed/150*8*STEPPER_MOTOR.steps_per_turn))
+    m1.waitForMotionCompletion()
     
     count+=1
     print("End of Looop")
